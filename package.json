@@ -1,0 +1,23 @@
+{
+  "name": "listenbrainz-player",
+  "version": "1.0.0",
+  "description": "Audio player for exporting to listenbrainz",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/ojsquire/listenbrainz-player.git"
+  },
+  "author": "ojsquire",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/ojsquire/listenbrainz-player/issues"
+  },
+  "homepage": "https://github.com/ojsquire/listenbrainz-player#readme",
+  "dependencies": {
+    "express": "^4.15.4",
+    "jsmediatags": "^3.8.0"
+  }
+}

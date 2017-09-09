@@ -1,0 +1,5 @@
+*.mp3
+*.ogg
+*.flac
+private.js
+node_modules

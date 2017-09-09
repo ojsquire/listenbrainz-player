@@ -6,6 +6,8 @@
   <source src="tst.mp3">
 </audio>
 
+<script type="text/javascript" src="private.js"></script>
+
 <script>
   // Getting metadata from file should be next, 
   // as don't wanna have to wait so long to test each part
@@ -38,10 +40,10 @@
     )
     xhr.open('POST', url, true);
     xhr.setRequestHeader('Content-type', 'application/json');
-    xhr.setRequestHeader('Authorization', 'OAuth ' + 'MY-KEY');
+    xhr.setRequestHeader('Authorization', 'OAuth ' + api_key);
     xhr.onload = function () {
       // do something to response
-      alert(xhr.responseText);
+	  console.log(xhr.responseText);
     };
     xhr.send(payload);
   }
