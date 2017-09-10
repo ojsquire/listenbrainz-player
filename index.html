@@ -2,9 +2,27 @@
 <html>
 <body>
 
-<audio controls id="player">
+<audio controls id="player1">
   <source src="/tst.mp3">
 </audio>
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+
+<script>
+    $("#player1").on("play", function () {
+	    console.log("Playback started");
+		$.ajax({
+			type: "POST",
+			url: '/',
+			dataType: "json",
+			contentType: "application/json",
+			data: JSON.stringify({objectData:"pleaseSendMeta"}),
+			success: function(data){
+				console.log(data);
+			}
+		});
+    });
+</script>
 
 </body>
 </html>

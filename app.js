@@ -8,10 +8,15 @@ app.get('/', function(request, response){
     response.sendFile(__dirname + '/index.html');
 });
 
-Here is the server-side stuff we need to pass back up
+app.post('/', function(request, response){
+	console.log('Message received, sending meta');
+	response.send({'message':'sending meta'});
+});
+
+// Here is the server-side stuff we need to pass back up
   // jsmediatags.read("./tst.mp3", {
     // onSuccess: function(tags) {
-	Here instead we want the POST request to be triggered
+//	Here instead we want the POST request to be triggered
 	  // res.write('Artist = ' + tags.tags.artist);
 	  // res.write('<br>');
 	  // res.write('Track = ' + tags.tags.title)
