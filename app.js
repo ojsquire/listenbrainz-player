@@ -1,6 +1,7 @@
 var express = require('express');
 var XMLHttpRequest = require('xhr2');
 var ffmpeg = require('fluent-ffmpeg');
+var bodyParser = require('body-parser');
 var api_key = require('./private');
 var app = express();
 
@@ -14,11 +15,16 @@ app.get('/', function(request, response){
     response.sendFile(__dirname + '/index.html');
 });
 
+// Use body parser to see request
+app.use(bodyParser.json());
+
 // It's working just I can't push back to client 
 //(need different xhr plan, like http or something)
 app.post('/', function(request, response){
-	console.log('Message received, sending meta');
-	ffmpeg.ffprobe('./public/01_untitled_2.mp3', function(err, metadata) {
+	//console.log('Message received, sending meta');
+	var playing_file = JSON.stringify(request.body.file_name).replace(/"/g,"")
+	console.log('Request received. Reading meta for ' + playing_file);
+	ffmpeg.ffprobe('./public/' + playing_file, function(err, metadata) {
 		var tags = metadata['format']['tags'];
 		console.log(tags);
 		var xhr = new XMLHttpRequest();
@@ -36,22 +42,23 @@ app.post('/', function(request, response){
 								],
 								"recording_mbid": tags['MusicBrainz Release Track Id']
 							},
-							"artist_name": metadata['format']['tags']['artist'],
-							"track_name": metadata['format']['tags']['title'],
-							"release_name": metadata['format']['tags']['album']
+							"artist_name": tags['artist'],
+							"track_name": tags['title'],
+							"release_name": tags['album']
 						}
 					}
 				]
 			}
 		)
-//		console.log(payload);
+		console.log('Sending payload to listenbrainz...');
+		console.log(payload);
 		xhr.open('POST', url, true);
 		xhr.setRequestHeader('Content-type', 'application/json');
 		xhr.setRequestHeader('Authorization', 'OAuth ' + api_key['api_key']);
 		xhr.onload = function () {
 				console.log(xhr.responseText);
 		};
-			xhr.send(payload);  
+		xhr.send(payload);  
 	});
 });		
 

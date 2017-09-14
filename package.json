@@ -17,6 +17,7 @@
   },
   "homepage": "https://github.com/ojsquire/listenbrainz-player#readme",
   "dependencies": {
+    "body-parser": "^1.18.1",
     "express": "^4.15.4",
     "jsmediatags": "^3.8.0",
     "xhr2": "^0.1.4"
