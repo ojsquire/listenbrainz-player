@@ -1,8 +1,11 @@
 var express = require('express');
 var XMLHttpRequest = require('xhr2');
-var jsmediatags = require('jsmediatags');
+var ffmpeg = require('fluent-ffmpeg');
 var api_key = require('./private');
 var app = express();
+
+ffmpeg.setFfmpegPath('ffmpeg.exe')
+ffmpeg.setFfprobePath('ffprobe.exe')
 
 // Need to specify static content to use
 app.use(express.static(__dirname + '/public'));
@@ -12,43 +15,45 @@ app.get('/', function(request, response){
 });
 
 // It's working just I can't push back to client 
-// (need different xhr plan, like http or something)
+//(need different xhr plan, like http or something)
 app.post('/', function(request, response){
 	console.log('Message received, sending meta');
-	jsmediatags.read("./public/tst.mp3", {
-		onSuccess: function(tag) {
-			console.log(tag);
-			var xhr = new XMLHttpRequest();
-			var url = 'https://api.listenbrainz.org/1/submit-listens'
-			// This will deliver the minimum required payload
-			var payload = JSON.stringify(
-			{
-				"listen_type": "single",
+	ffmpeg.ffprobe('./public/01_untitled_2.mp3', function(err, metadata) {
+		var tags = metadata['format']['tags'];
+		console.log(tags);
+		var xhr = new XMLHttpRequest();
+		var url = 'https://api.listenbrainz.org/1/submit-listens'
+		var payload = JSON.stringify(
+			{"listen_type": "single",
 				"payload": [
-				{
-					"listened_at": Math.floor(Date.now()/1000),
-					"track_metadata": {
-					"artist_name": tag.tags.artist,
-					"track_name": tag.tags.title,
-					"release_name": tag.tags.album
+					{
+						"listened_at": Math.floor(Date.now()/1000),
+						"track_metadata": {
+							"additional_info": {
+								"release_mbid": tags['MusicBrainz Album Id'],
+								"artist_mbids": [
+									tags['MusicBrainz Artist Id']
+								],
+								"recording_mbid": tags['MusicBrainz Release Track Id']
+							},
+							"artist_name": metadata['format']['tags']['artist'],
+							"track_name": metadata['format']['tags']['title'],
+							"release_name": metadata['format']['tags']['album']
+						}
 					}
-				}
 				]
 			}
-			)
-			xhr.open('POST', url, true);
-			xhr.setRequestHeader('Content-type', 'application/json');
-			xhr.setRequestHeader('Authorization', 'OAuth ' + api_key['api_key']);
-			xhr.onload = function () {
+		)
+//		console.log(payload);
+		xhr.open('POST', url, true);
+		xhr.setRequestHeader('Content-type', 'application/json');
+		xhr.setRequestHeader('Authorization', 'OAuth ' + api_key['api_key']);
+		xhr.onload = function () {
 				console.log(xhr.responseText);
-			};
+		};
 			xhr.send(payload);  
-		},
-		onError: function(error) {
-			console.log(':(', error.type, error.info);
-		}
 	});
-});
+});		
 
 var server = app.listen(8080, function () {
    var host = server.address().address

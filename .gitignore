@@ -1,5 +1,6 @@
 *.mp3
 *.ogg
 *.flac
+*.exe
 private.js
 node_modules
