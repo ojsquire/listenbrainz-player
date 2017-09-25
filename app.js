@@ -1,13 +1,11 @@
 var express = require('express');
 var XMLHttpRequest = require('xhr2');
-var ffmpeg = require('fluent-ffmpeg');
 var bodyParser = require('body-parser');
 var api_key = require('./private');
 var app = express();
-
-ffmpeg.setFfmpegPath('ffmpeg.exe')
-ffmpeg.setFfprobePath('ffprobe.exe')
-
+var mm = require('music-metadata');
+const util = require('util')
+ 
 // Need to specify static content to use
 app.use(express.static(__dirname + '/public'));
 
@@ -24,8 +22,9 @@ app.post('/', function(request, response){
 	//console.log('Message received, sending meta');
 	var playing_file = JSON.stringify(request.body.file_name).replace(/"/g,"")
 	console.log('Request received. Reading meta for ' + playing_file);
-	ffmpeg.ffprobe('./public/' + playing_file, function(err, metadata) {
-		var tags = metadata['format']['tags'];
+	mm.parseFile('./public/' + playing_file, {native: true})
+    .then(function (metadata) {
+        var tags = metadata['common'];
 		console.log(tags);
 		var xhr = new XMLHttpRequest();
 		var url = 'https://api.listenbrainz.org/1/submit-listens'
@@ -36,11 +35,11 @@ app.post('/', function(request, response){
 						"listened_at": Math.floor(Date.now()/1000),
 						"track_metadata": {
 							"additional_info": {
-								"release_mbid": tags['MusicBrainz Album Id'],
+								"release_mbid": tags['musicbrainz_albumid'],
 								"artist_mbids": [
-									tags['MusicBrainz Artist Id']
+									tags['musicbrainz_artistid']
 								],
-								"recording_mbid": tags['MusicBrainz Release Track Id']
+								"recording_mbid": tags['musicbrainz_recordingid']
 							},
 							"artist_name": tags['artist'],
 							"track_name": tags['title'],
@@ -59,7 +58,10 @@ app.post('/', function(request, response){
 				console.log(xhr.responseText);
 		};
 		xhr.send(payload);  
-	});
+	  })
+  .catch(function (err) {
+    console.error(err.message);
+  });
 });		
 
 var server = app.listen(8080, function () {
