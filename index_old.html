@@ -1,0 +1,47 @@
+<!--
+<body>
+     <h1>Val: <span id="payload"><%- JSON.stringify(payload) %></span></h1>
+</body>
+-->
+<!DOCTYPE html>
+<html>
+<body>
+<p>
+To play a file, put it in the public directory and then select it.
+</p>
+<input type="file" id="input"/>
+<br>
+<audio controls id="player1"></audio>
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+
+<script>
+input.onchange = function(e){
+  var sound = document.getElementById('player1');
+  sound.src = URL.createObjectURL(this.files[0]);
+  sound.onend = function(e) {
+    URL.revokeObjectURL(this.src);
+  }
+}
+</script>
+
+<script>
+    $("#player1").on("play", function () {
+	    console.log("Playback started");
+		var the_file_name = $('#input').prop("files")[0]['name'];
+		console.log(the_file_name);
+		$.ajax({
+			type: "POST",
+			url: '/',
+			dataType: "json",
+			contentType: "application/json",
+			data: JSON.stringify({'file_name':the_file_name}),
+			success: function(data){
+				console.log(data);
+			}
+		});
+    });
+</script>
+
+</body>
+</html>
