@@ -17,16 +17,44 @@ app.use(function(req, res, next){
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views/pages'));
 
+// Send basic index page when client first connects
 app.get('/', function(req, res){
 	res.render('index')
 });
 
+// Return track meta to client
 app.post('/', function(req, res){
   var playing_file = req.body.file_name
   mm.parseFile('./public/audio/' + playing_file, {native: true})
   .then(function (metadata) {
     var tags = metadata['common'];
-    console.log(tags);
+    console.log(playing_file);
+	res.render('index', {
+		playing_file: playing_file, 
+	    artist: tags['artist'],
+		release_name: tags['album'],
+		track_nr: tags['track']['no'],
+		track_tot: tags['track']['of'],
+		track_name: tags['title'],
+		year: tags['year'],
+		artist_mbid: tags['musicbrainz_artistid'],
+		release_mbid: tags['musicbrainz_albumid'],
+		recording_mbid: tags['musicbrainz_recordingid']
+	});
+  })
+  .catch(function (err) {
+    console.error(err.message);
+  });
+});		
+
+// Post meta to Listenbrainz on play (should add timeout in)
+app.post('/lb', function(req, res){
+    var stringpf = JSON.stringify(req.body.file_name);
+    var playing_file = stringpf.substring(stringpf.lastIndexOf("/")+1).replace(/['"]+/g, '');
+    console.log('lb: ' + playing_file);
+    mm.parseFile('./public/audio/' + playing_file, {native: true})
+  .then(function (metadata) {
+    var tags = metadata['common'];
     var xhr = new XMLHttpRequest();
     var url = 'https://api.listenbrainz.org/1/submit-listens'
     var payload = JSON.stringify(
@@ -54,25 +82,12 @@ app.post('/', function(req, res){
     xhr.onload = function () {
       console.log(xhr.responseText);
     };
-//    xhr.send(payload);
-    console.log(playing_file);
-	res.render('index', {
-		playing_file: playing_file, 
-	    artist: tags['artist'],
-		release_name: tags['album'],
-		track_nr: tags['track']['no'],
-		track_tot: tags['track']['of'],
-		track_name: tags['title'],
-		year: tags['year'],
-		artist_mbid: tags['musicbrainz_artistid'],
-		release_mbid: tags['musicbrainz_albumid'],
-		recording_mbid: tags['musicbrainz_recordingid']
-	});
+    xhr.send(payload);
   })
   .catch(function (err) {
     console.error(err.message);
   });
-});		
+});
 
 var server = app.listen(8080, function () {
   var host = server.address().address

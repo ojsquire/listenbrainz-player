@@ -22,15 +22,36 @@
 <%}%>
 <br>
 <audio id="audio1" controls="controls">
-    <source src="<%= '/audio/' + playing_file %>"/>
+    <source id="audio1src" src="<%= '/audio/' + playing_file %>"/>
 </audio>
 
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
 <script>
+//scrobble after 50% played, but kill scrobbling if audio is not playing (is paused)
+// better to have a cache?
+// first just try to separate out the post requests
 var audio = $("#audio1")[0];
 audio.onloadedmetadata = function() {
   console.log(audio.duration/2);
 };
+
+$("#audio1").on("play", function () {
+    console.log("Playback started");
+	var p2 = document.getElementById('audio1src');
+	var the_file_name = p2.src;
+	console.log(the_file_name);
+	$.ajax({
+		type: "POST",
+		url: '/lb',
+		dataType: "json",
+		contentType: "application/json",
+		data: JSON.stringify({'file_name':the_file_name}),
+		success: function(data){
+			console.log(data);
+		}
+	});
+});
+
 </script>
 
 </body>
