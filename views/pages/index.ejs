@@ -13,17 +13,25 @@
 <% if(playing_file!=null){ %>
     <div>
 	    <ul>
-            <li>Artist: <%= artist %></li>
-            <li>Album:  <%= release_name %></li>			
-            <li>Track:  <%= track_nr%>. <%= track_name %></li>
+            <li>Artist: <a href="<%= 'https://musicbrainz.org/artist/' + artist_mbid %>" rel="noopener noreferrer" target="_blank"><%= artist %></a></li>
+            <li>Album: <a href="<%= 'https://musicbrainz.org/release/' + release_mbid %>" rel="noopener noreferrer" target="_blank"><%= release_name %></a></li>
+			<li>Title: <a href="<%= 'https://musicbrainz.org/recording/' + recording_mbid %>" rel="noopener noreferrer" target="_blank"><%= track_name %></a></li>
+            <li>Track: <%= track_nr%> of <%= track_tot%></li>
         </ul>
     </div>
 <%}%>
 <br>
-<audio controls="controls">
+<audio id="audio1" controls="controls">
     <source src="<%= '/audio/' + playing_file %>"/>
 </audio>
 
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+<script>
+var audio = $("#audio1")[0];
+audio.onloadedmetadata = function() {
+  console.log(audio.duration/2);
+};
+</script>
 
 </body>
 </html>

@@ -54,14 +54,19 @@ app.post('/', function(req, res){
     xhr.onload = function () {
       console.log(xhr.responseText);
     };
-    xhr.send(payload);
+//    xhr.send(payload);
     console.log(playing_file);
 	res.render('index', {
 		playing_file: playing_file, 
 	    artist: tags['artist'],
 		release_name: tags['album'],
 		track_nr: tags['track']['no'],
-		track_name: tags['title']
+		track_tot: tags['track']['of'],
+		track_name: tags['title'],
+		year: tags['year'],
+		artist_mbid: tags['musicbrainz_artistid'],
+		release_mbid: tags['musicbrainz_albumid'],
+		recording_mbid: tags['musicbrainz_recordingid']
 	});
   })
   .catch(function (err) {
