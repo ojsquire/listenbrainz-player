@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+<body>
+<p>
+<input type="file" 
+       onchange="document.getElementById('hidden_file').value = this.files[0].name;" />
+</p>
+<form method="POST" action="/">
+    <input type="hidden" id="hidden_file" value="" name="file_name"/>
+    <input type="submit" value="Load"/>
+</form>
+<br>
+<% if(playing_file!=null){ %>
+    <div>
+	    <ul>
+            <li>Artist: <%= artist %></li>
+            <li>Album:  <%= release_name %></li>			
+            <li>Track:  <%= track_nr%>. <%= track_name %></li>
+        </ul>
+    </div>
+<%}%>
+<br>
+<audio controls="controls">
+    <source src="<%= '/audio/' + playing_file %>"/>
+</audio>
+
+
+</body>
+</html>

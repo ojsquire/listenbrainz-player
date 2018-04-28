@@ -4,24 +4,26 @@ var bodyParser = require('body-parser');
 var api_key = require('./private');
 var mm = require('music-metadata');
 var app = express();
-const util = require('util')
- 
-// Need to specify static content to use
-app.use(express.static(__dirname + '/public'));
+var path = require('path');
 
-app.get('/', function(request, response){
-  response.sendFile(__dirname + '/index.html');
+app.use(bodyParser.urlencoded({extended: false}));
+app.use(bodyParser.json());
+app.use(express.static(__dirname + '/public'));
+app.use(function(req, res, next){
+    res.locals.playing_file = null;
+	next();
 });
 
-// Use body parser to see request
-app.use(bodyParser.json());
+app.set('view engine', 'ejs');
+app.set('views', path.join(__dirname, 'views/pages'));
 
-// It's working just I can't push back to client 
-//(need different xhr plan, like http or something)
-app.post('/', function(request, response){
-  var playing_file = JSON.stringify(request.body.file_name).replace(/"/g,"")
-  console.log('Request received. Reading meta for ' + playing_file);
-  mm.parseFile('./public/' + playing_file, {native: true})
+app.get('/', function(req, res){
+	res.render('index')
+});
+
+app.post('/', function(req, res){
+  var playing_file = req.body.file_name
+  mm.parseFile('./public/audio/' + playing_file, {native: true})
   .then(function (metadata) {
     var tags = metadata['common'];
     console.log(tags);
@@ -52,7 +54,15 @@ app.post('/', function(request, response){
     xhr.onload = function () {
       console.log(xhr.responseText);
     };
-    xhr.send(payload);  
+    xhr.send(payload);
+    console.log(playing_file);
+	res.render('index', {
+		playing_file: playing_file, 
+	    artist: tags['artist'],
+		release_name: tags['album'],
+		track_nr: tags['track']['no'],
+		track_name: tags['title']
+	});
   })
   .catch(function (err) {
     console.error(err.message);

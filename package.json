@@ -20,6 +20,9 @@
     "body-parser": "^1.18.1",
     "express": "^4.15.4",
     "jsmediatags": "^3.8.0",
-    "xhr2": "^0.1.4"
+    "xhr2": "^0.1.4",
+	"ejs": "^2.5.5",
+	"express-session": "1.15.6",
+	"music-metadata": "0.11.2",
   }
 }
